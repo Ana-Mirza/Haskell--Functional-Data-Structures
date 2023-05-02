@@ -234,13 +234,11 @@ zipExtend a' b' (a : as) (b : bs) = (a, b) : zipExtend a' b' as bs
     , Node {prio = 1, key = 'a', children = [Node {prio = 2, key = 'b', children = []}]}
     ]
 -}
-appendTree :: Ord p => [BinomialTree p k] -> BinomialTree p k -> [BinomialTree p k]
-appendTree trees EmptyTree = trees
-appendTree trees tree = trees ++ [tree]
-
 
 mergeTrees :: Ord p => [BinomialTree p k] -> [BinomialTree p k] -> [BinomialTree p k]
-mergeTrees trees1 trees2 =  appendTree (snd pair) (fst pair)
+mergeTrees trees1 trees2 = case (fst pair) of
+    EmptyTree -> (snd pair)
+    otherwise -> (snd pair) ++ [fst pair]
     where
     pair = (mapAccumL (\acc (x, y) -> ((head ((tail ((insertTree acc (insertTree x (insertTree y []))) ++ [EmptyTree])) ++ [EmptyTree])), (head ((insertTree acc (insertTree x (insertTree y []))) ++ [EmptyTree])))) EmptyTree list)
     list = zipExtend EmptyTree EmptyTree trees1 trees2
