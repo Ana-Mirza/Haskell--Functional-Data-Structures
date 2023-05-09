@@ -1,4 +1,4 @@
-module BinomialHeap where
+  module BinomialHeap where
 
 import Data.Function (on)
 import Data.List hiding (insert)
@@ -58,7 +58,12 @@ data BinomialHeap p k = BinomialHeap { size :: Int, trees :: [BinomialTree p k] 
     Node {prio = 0, key = 'a', children = [Node {prio = 1, key = 'b', children = []}]}
 -}
 attach :: Ord p => BinomialTree p k -> BinomialTree p k -> BinomialTree p k
-attach tree1 tree2 = undefined
+attach EmptyTree EmptyTree = EmptyTree
+attach EmptyTree (Node prio key children) = (Node prio key children)
+attach (Node prio key children) EmptyTree = (Node prio key children)
+attach tree1@(Node prio1 key1 children1) tree2@(Node prio2 key2 children2)
+    | prio1 <= prio2 = (Node prio1 key1 (tree2 : children1))
+    | prio2 < prio1 = (Node prio2 key2 (tree1 : children2))
 
 {-
     *** TODO ***
@@ -106,7 +111,12 @@ attach tree1 tree2 = undefined
     ]
 -}
 insertTree :: Ord p => BinomialTree p k -> [BinomialTree p k] -> [BinomialTree p k]
-insertTree tree trees = undefined
+insertTree EmptyTree trees = trees
+insertTree tree@(Node prio key children) trees = case trees of
+    [] -> [tree]
+    otherwise -> case (head trees) of
+        EmptyTree -> (tree : (tail trees))
+        otherwise -> (EmptyTree : (insertTree (attach tree (head trees)) (tail trees)))
 
 {-
     *** TODO ***
@@ -114,7 +124,7 @@ insertTree tree trees = undefined
     Heap-ul vid.
 -}
 emptyHeap :: BinomialHeap p k
-emptyHeap = undefined
+emptyHeap = (BinomialHeap 0 [])
 
 {-
     *** TODO ***
@@ -148,7 +158,7 @@ emptyHeap = undefined
         }
 -}
 insert :: Ord p => p -> k -> BinomialHeap p k -> BinomialHeap p k
-insert prio key heap = undefined
+insert prio key heap@(BinomialHeap size trees) = (BinomialHeap (size + 1) (insertTree (Node prio key []) trees))
 
 {-
     *** TODO ***
@@ -175,7 +185,8 @@ insert prio key heap = undefined
     Just (1,'a')
 -}
 findMin :: Ord p => BinomialHeap p k -> Maybe (p, k)
-findMin heap = undefined
+findMin heap@(BinomialHeap 0 []) = Nothing
+findMin heap@(BinomialHeap size trees) = Just (minimumBy (compare `on` fst) $ [(prio, key) | node@(Node prio key children) <- trees])
 
 {-
     Funcția zipExtend este similară funcției predefinite zip. Scopul ei este
@@ -226,7 +237,12 @@ zipExtend a' b' (a : as) (b : bs) = (a, b) : zipExtend a' b' as bs
     ]
 -}
 mergeTrees :: Ord p => [BinomialTree p k] -> [BinomialTree p k] -> [BinomialTree p k]
-mergeTrees trees1 trees2 = undefined
+mergeTrees trees1 trees2 = case (fst pair) of
+    EmptyTree -> (snd pair)
+    otherwise -> (snd pair) ++ [fst pair]
+    where
+    pair = (mapAccumL (\acc (x, y) -> ((head ((tail ((insertTree acc (insertTree x (insertTree y []))) ++ [EmptyTree])) ++ [EmptyTree])), (head ((insertTree acc (insertTree x (insertTree y []))) ++ [EmptyTree])))) EmptyTree list)
+    list = zipExtend EmptyTree EmptyTree trees1 trees2
 
 {-
     *** TODO ***
@@ -238,7 +254,7 @@ mergeTrees trees1 trees2 = undefined
     Exemple: similare cu cele de la mergeTrees.
 -}
 merge :: Ord p => BinomialHeap p k -> BinomialHeap p k -> BinomialHeap p k
-merge heap1 heap2 = undefined
+merge heap1@(BinomialHeap size1 trees1) heap2@(BinomialHeap size2 trees2) = (BinomialHeap (size1 + size2) (mergeTrees trees1 trees2))
 
 ----------------------------------- Etapa 3 ------------------------------------
 
@@ -263,7 +279,10 @@ merge heap1 heap2 = undefined
     [(1,[0,2,3]),(2,[1,0,3]),(3,[1,2])]  -- fără 0 în ultima listă
 -}
 isolate :: a -> [a] -> [(a, [a])]
-isolate placeHolder list = undefined
+isolate placeHolder list = map (\(x, (y, lst)) -> if x == len then (y, (take (len - 1) list)) else (y, ((take (x - 1) list) ++ [placeHolder] ++ (drop (x) list)))) myList
+  where
+  myList = zip [1..len] $ map (\x -> (x, list)) list
+  len = length list
 
 {-
     *** TODO ***
