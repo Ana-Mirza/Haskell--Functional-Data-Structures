@@ -426,7 +426,8 @@ instance (Show p, Show k) => Show (BinomialHeap p k) where
 -}
 instance Functor (BinomialTree p) where
     -- fmap :: (k1 -> k2) -> BinomialTree p k1 -> BinomialTree p k2
-    fmap f tree = undefined
+    fmap f EmptyTree = EmptyTree
+    fmap f tree@(Node p k chd) = Node p (f k) (map (fmap f) chd)
 
 {-
     *** TODO ***
@@ -449,7 +450,8 @@ instance Functor (BinomialTree p) where
 -}
 instance Functor (BinomialHeap p) where
     -- fmap :: (k1 -> k2) -> BinomialHeap p k1 -> BinomialHeap p k2
-    fmap f heap = undefined
+    fmap f heap@(BinomialHeap 0 []) = BinomialHeap 0 []
+    fmap f heap@(BinomialHeap num list) = BinomialHeap num (map (fmap f) list) 
 
 {-
     *** TODO BONUS ***
