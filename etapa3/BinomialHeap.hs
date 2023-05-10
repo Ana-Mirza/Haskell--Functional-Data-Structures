@@ -326,7 +326,14 @@ isolate placeHolder list = map (\(x, (y, lst)) -> if x == len then (y, (take (le
     evaluării leneșe la utilizarea eficientă a funcției isolate?
 -}
 removeMin :: (Ord p, Eq k) => BinomialHeap p k -> BinomialHeap p k
-removeMin heap = undefined
+removeMin heap@(BinomialHeap 0 []) = heap
+removeMin heap@(BinomialHeap 1 [tree]) = (BinomialHeap 0 [])
+removeMin heap@(BinomialHeap size trees) = (BinomialHeap (size - 1) (mergeTrees listTrees listChildren))
+  where
+    pair = (minimumBy (compare `on` prio . fst) [(tree, list) | (tree@(Node p k chd), list) <- pairs_tmp])
+    pairs_tmp = (isolate EmptyTree trees)
+    listTrees = (snd pair)
+    listChildren = (reverse (children (fst pair)))
 
 {-
     *** TODO ***
@@ -363,8 +370,13 @@ removeMin heap = undefined
         4 ('d')
       2 ('b')
 -}
+
+showLine:: (Show p, Show k) => Int -> (BinomialTree p k) -> [Char]
+showLine _ EmptyTree = "*\n"
+showLine tabs tree@(Node p1 k1 children) = (concat (replicate tabs "  ")) ++ (show p1) ++ " (" ++ (show k1) ++ ")\n" ++ (concat (map (\x -> (showLine (tabs + 1) x)) children))
+
 instance (Show p, Show k) => Show (BinomialTree p k) where
-    show tree = undefined
+  show tree = take ((length (showLine 0 tree)) - 1) (showLine 0 tree)
 
 {-
     *** TODO ***
@@ -391,7 +403,7 @@ instance (Show p, Show k) => Show (BinomialTree p k) where
       2 ('b')
 -}
 instance (Show p, Show k) => Show (BinomialHeap p k) where
-    show heap = undefined
+    show heap = take ((length (concat (map (\x -> (show x) ++ "\n") (trees heap)))) - 1) (concat (map (\x -> (show x) ++ "\n") (trees heap)))
 
 {-
     *** TODO ***
