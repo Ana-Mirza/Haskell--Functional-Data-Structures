@@ -501,4 +501,5 @@ instance Functor (BinomialHeap p) where
 -}
 instance Foldable (BinomialTree p) where
     -- foldr :: (k -> b -> b) -> b -> BinomialTree p k -> b
-    foldr f acc tree = undefined
+    foldr f acc EmptyTree = acc
+    foldr f acc (Node p k children) = (f k) (foldl (foldr f) acc (reverse children))
